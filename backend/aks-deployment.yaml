@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: backend
+        image: 381354187112.dkr.ecr.us-east-1.amazonaws.com/aws-deployment-anywhere:latest
+        resources:
+          limits:
+            memory: 512Mi
+            cpu: "1"
+          requests:
+            memory: 256Mi
+            cpu: "0.2"
+        ports:
+        - containerPort: 80
+      # Create secret with login password before pull image from AWS ECR:
+      #
+      # $ kubectl create secret docker-registry regcred \
+      #     --docker-server=${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com \
+      #     --docker-username=AWS \
+      #     --docker-password=$(aws ecr get-login-password)
+      imagePullSecrets:
+        - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: backend
