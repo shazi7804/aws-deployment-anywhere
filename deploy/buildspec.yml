@@ -1,0 +1,23 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+  pre_build:
+    commands:
+      - aws --version
+      - aws sts get-caller-identity
+  build:
+    commands:
+      - aws ecr-public get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin public.ecr.aws
+      - echo Build started on `date`
+      - echo Building the Docker image...··········
+      - docker build -t localimage:latest backend/src/.
+      - docker tag localimage:latest ${IMAGE_URI}:latest
+      - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+      - docker push $IMAGE_URI
+artifacts:
+  files:
+    - '**/*'
+  name: aws-deployment-anywhere-${CODEBUILD_BUILD_NUMBER}-${CODEBUILD_SOURCE_VERSION}
+  base-directory: 'backend'

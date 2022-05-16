@@ -1,25 +1,26 @@
 import { Construct } from "constructs";
 import { App, TerraformStack, RemoteBackend } from "cdktf";
-import * as aws from './.gen/providers/aws';
 import { AwsDeploymentStack } from './lib/aws-deployment';
+import { AwsEc2Stack } from './lib/aws-ec2';
+import { AzureKubernetesStack } from './lib/azure-kubernetes';
 
-import * as az from '../.gen/providers/azurerm';
 
 class AwsDeploymentAnywhereStack extends TerraformStack {
   constructor(scope: Construct, name: string) {
     super(scope, name);
 
-    new aws.AwsProvider(this, 'aws', {
+    new AwsEc2Stack(this, 'aws-ec2', {
       region: 'us-east-1'
-    });
+    })
+
+    new AzureKubernetesStack(this, 'azure-kubernetes', {
+      region: 'eastus'
+    })
 
     new AwsDeploymentStack(this, 'aws-deployment', {
       region: 'us-east-1'
     })
 
-    new az.AzurermProvider(this, 'azure');
-
-    new
 
   }
 }

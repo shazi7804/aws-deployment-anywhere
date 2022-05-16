@@ -1,0 +1,28 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+  pre_build:
+    commands:
+      - aws --version
+      - aws sts get-caller-identity
+      # Install azure-cli
+      - pip3 install azure-cli
+      - az version
+      # Install kubectl with version 1.21 & Azure credential
+      - curl -LO https://dl.k8s.io/release/v1.23.0/bin/linux/amd64/kubectl
+      - chmod +x kubectl && mv ./kubectl /usr/local/bin/kubectl
+      - aws s3 cp s3://aws-deployment-anywhere-store-${AWS_DEFAULT_REGION}-${AWS_ACCOUNT_ID}/kubeconfig ~/.kube/config # The Azure service principal is access AKS best practice. (https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli)
+      # - az aks get-credentials --resource-group aws-deployment-anywhere --name aws-deployment-anywhere
+      - kubectl version
+  build:
+    commands:
+      - kubectl get no
+      - kubectl apply -f aks-deployment.yaml
+      - kubectl get po
+      - kubectl get service
+artifacts:
+  files:
+    - '**/*'
+  name: aws-deployment-anywhere-${CODEBUILD_BUILD_NUMBER}-${CODEBUILD_SOURCE_VERSION}

@@ -1,24 +1,21 @@
 import { Construct } from "constructs";
-import { TerraformStack } from "cdktf";
+import { Resource } from "cdktf";
+import { AzurermProvider } from './../.gen/providers/azurerm'
 import {
   ResourceGroup,
   KubernetesCluster,
-  // KubernetesClusterConfig,
-  // KubernetesClusterServicePrincipal,
-  KubernetesClusterRoleBasedAccessControl,
   KubernetesClusterIdentity,
-  KubernetesClusterNetworkProfile,
-  KubernetesClusterAddonProfile,
-  KubernetesClusterAddonProfileKubeDashboard,
-  KubernetesClusterDefaultNodePool } from '../.gen/providers/azurerm'
+  KubernetesClusterDefaultNodePool } from './../.gen/providers/azurerm'
 
 export interface AzureKubernetesProps {
   readonly region: string;
 }
 
-export class AzureKubernetesStack extends TerraformStack {
+export class AzureKubernetesStack extends Resource {
   constructor(scope: Construct, name: string, props: AzureKubernetesProps) {
     super(scope, name);
+
+    new AzurermProvider(this, 'azure', { features: {}});
 
     const location = props.region
 
@@ -28,19 +25,6 @@ export class AzureKubernetesStack extends TerraformStack {
     });
 
     const identity: KubernetesClusterIdentity = { type: 'SystemAssigned'}
-    const roleBasedAccessControl: KubernetesClusterRoleBasedAccessControl = { enabled: true }
-
-    // const pool: az.KubernetesClusterDefaultNodePool = {
-    //   name: 'default',
-    //   vmSize: 'Standard_D2_v2',
-    //   nodeCount: 1
-    // }
-
-    // Addon Profile
-    const addonProfileKubeDashboard: KubernetesClusterAddonProfileKubeDashboard = { enabled: true } 
-    const addonProfile: KubernetesClusterAddonProfile = {
-        kubeDashboard: addonProfileKubeDashboard
-    }
 
     const defaultNodePool: KubernetesClusterDefaultNodePool = {
       name: 'default',
@@ -48,23 +32,16 @@ export class AzureKubernetesStack extends TerraformStack {
       nodeCount: 1
     }
 
-    // const ident: az.KubernetesClusterServicePrincipal = {
-    //   clientId: process.env.AZ_SP_CLIENT_ID as string,
-    //   clientSecret: process.env.AZ_SP_CLIENT_SECRET as string
-    // }
-
-    const aks = new KubernetesCluster(this, 'aks', {
+    new KubernetesCluster(this, 'aks', {
       name: 'aws-deployment-anywhere',
       location,
       resourceGroupName: resourceGroup.name,
       kubernetesVersion: '1.22.6',
       identity,
-      roleBasedAccessControl,
-      addonProfile,
+      roleBasedAccessControlEnabled: true,
       dnsPrefix: 'aws-deployment-anywhere',
-      defaultNodePool: defaultNodePool,
-      // dependsOn: [resourceGroup.name, azureKubernetesDefaultPool, props.azureNetwork],
-  });
+      defaultNodePool,
+    });
 
 
   }

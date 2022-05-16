@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@cdktf/provider-aws": "^7.0.51",
+    "@cdktf/provider-azurerm": "^0.6.50",
     "cdktf": "^0.10.4",
     "constructs": "^10.1.6"
   },
