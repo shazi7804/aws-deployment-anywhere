@@ -299,6 +299,19 @@ export class AwsDeploymentStack extends Resource {
           }]
         },
         {
+          name: 'Approve',
+          action: [{
+            name: 'Approval',
+            category: 'Approval',
+            owner: 'AWS',
+            provider: 'Manual',
+            version: '1',
+            configuration: {
+              CustomData: "Approve release changes"
+            }
+          }]
+        },
+        {
           name: 'Deploy',
           action: [
             {
@@ -313,7 +326,7 @@ export class AwsDeploymentStack extends Resource {
                 DeploymentGroupName: codedeployGroup.deploymentGroupName
               },
               runOrder: 1
-            },            
+            },
             {
               name: 'Deploy-Azure-Kubernetes',
               category: 'Build',
