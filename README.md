@@ -77,7 +77,7 @@ $ git add . && git commit -am "initial commit" && git push origin master
 
 ###  Step 7. View deploy successfully from AWS CodePipeline
 
-<img src="img/codepipeline-deploy.png" width="500">
+<img src="img/codepipeline.png" width="500">
 
 ###  Step 8.
 
