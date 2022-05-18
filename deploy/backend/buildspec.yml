@@ -19,6 +19,10 @@ phases:
   build:
     commands:
       - kubectl get no
+      # refresh token 
+      - kubectl delete secret regcred
+      - kubectl create secret docker-registry regcred --docker-server=${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com --docker-username=AWS --docker-password=$(aws ecr get-login-password)
+      # deployment
       - kubectl apply -f aks-deployment.yaml
       - kubectl get po
       - kubectl get service
